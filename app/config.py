@@ -20,6 +20,12 @@ DATABASE_URL = (
     f"@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 )
 
+ALEMBIC_DATABASE_URL = (
+    f"postgresql://"
+    f"{DB_USER}:{DB_PASSWORD}"
+    f"@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+)
+
 logger = logging.getLogger()
 
 debug_mode = os.getenv("DEBUG", "False").lower() in (

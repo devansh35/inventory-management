@@ -3,11 +3,17 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.config import logger
+from app.exceptions.product import ProductAlreadyExistsException
 from app.models.product import Product
 from app.schemas.product import ProductCreate, ProductUpdate
 
 class ProductService:
     async def create_product(self, db: AsyncSession, product_data: ProductCreate) -> Product:
+        if await self.product_exists(db, product_data.description):
+            logger.warning(f"Product with description {product_data.description} already exists")
+            raise ProductAlreadyExistsException()
+
         product = Product(
             name=product_data.name,
             description=product_data.description,
@@ -18,7 +24,13 @@ class ProductService:
         db.add(product)
         await db.commit()
         await db.refresh(product)
+        logger.info(f"Product {product.id} created successfully")
         return product
+
+    async def product_exists(self, db: AsyncSession, description: str) -> bool:
+        result = await db.execute(select(Product).where(Product.description == description))
+        product = result.scalar_one_or_none()
+        return product is not None
 
     async def get_product_by_id(self, db: AsyncSession, product_id: UUID) -> Product | None:
         result = await db.execute(select(Product).where(Product.id == product_id))

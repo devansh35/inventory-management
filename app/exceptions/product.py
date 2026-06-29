@@ -1,4 +1,7 @@
 from app.exceptions.base import InventoryException
 
-class ProductAlreadyExistsException(InventoryException):
+class ProductAlreadyExists(InventoryException):
+    pass
+
+class ProductNotFound(InventoryException):
     pass

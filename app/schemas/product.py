@@ -11,10 +11,10 @@ class ProductCreate(BaseModel):
     quantity_in_stock: int = Field(..., ge=0)
 
 class ProductUpdate(BaseModel):
-    name: str | None = None
-    description: str | None = None
-    price: Decimal | None = None
-    quantity_in_stock: int | None = None   
+    name: str | None = Field(None, min_length=1)
+    description: str | None = Field(None, min_length=1)
+    price: Decimal | None = Field(None, gt=0)
+    quantity_in_stock: int | None = Field(None, ge=0)   
 
 class ProductResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)

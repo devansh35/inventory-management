@@ -10,7 +10,7 @@ from app.schemas.product import ProductCreate, ProductUpdate
 
 class ProductService:
     async def create_product(self, db: AsyncSession, product_data: ProductCreate) -> Product:
-        if await self.product_exists(db, product_data.description):
+        if await self.get_product_by_description(db, product_data.description):
             logger.warning(f"Product with description {product_data.description} already exists")
             raise ProductAlreadyExists()
 
@@ -24,6 +24,7 @@ class ProductService:
         db.add(product)
         await db.commit()
         await db.refresh(product)
+
         logger.info(f"Product {product.id} created successfully")
         return product
 
@@ -32,7 +33,7 @@ class ProductService:
         product = result.scalar_one_or_none()
 
         if not product:
-            logger.warning(f"Product {product_id} not found")
+            logger.warning(f"Product with id {product_id} not found")
             raise ProductNotFound()
 
         return product
@@ -47,7 +48,7 @@ class ProductService:
         if product_data.description:
             existing_product = await self.get_product_by_description(db, product_data.description)
             
-            if existing_product and existing_product.id != product_id:
+            if existing_product and existing_product.id != product.id:
                 logger.warning(f"Product with description {product_data.description} already exists")
                 raise ProductAlreadyExists()
         
@@ -58,6 +59,8 @@ class ProductService:
 
         await db.commit()
         await db.refresh(product)
+
+        logger.info(f"Product {product.id} updated successfully")
         return product
 
     async def delete_product(self, db: AsyncSession, product_id: UUID) -> None:
@@ -67,11 +70,6 @@ class ProductService:
         await db.commit()
 
         logger.info(f"Product {product.id} deleted successfully")   
-
-    async def product_exists(self, db: AsyncSession, description: str) -> bool:
-        result = await db.execute(select(Product).where(Product.description == description))
-        product = result.scalar_one_or_none()
-        return product is not None
 
     async def get_product_by_description(self, db: AsyncSession, description: str) -> Product | None:
         result = await db.execute(select(Product).where(Product.description == description))

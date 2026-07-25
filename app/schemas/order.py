@@ -2,17 +2,17 @@ from datetime import datetime
 from decimal import Decimal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, Field, ConfigDict
 
 from app.models.enums import OrderStatus
 
 class OrderItemCreate(BaseModel):
     product_id: UUID
-    quantity: int
+    quantity: int = Field(..., gt=0)
 
 class OrderCreate(BaseModel):
     customer_id: UUID
-    items: list[OrderItemCreate]
+    items: list[OrderItemCreate] = Field(..., min_length=1)
 
 class OrderItemResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)

@@ -75,4 +75,9 @@ class ProductService:
         result = await db.execute(select(Product).where(Product.description == description))
         return result.scalar_one_or_none()
 
+    async def get_products_by_ids(self, db: AsyncSession, product_ids: list[UUID]) -> dict[UUID, Product]:
+        result = await db.execute(select(Product).where(Product.id.in_(product_ids)))
+        products = result.scalars().all()    
+        return {product.id: product for product in products}
+
 product_service = ProductService()

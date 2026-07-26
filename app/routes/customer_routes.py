@@ -1,5 +1,5 @@
 from uuid import UUID
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
@@ -8,7 +8,7 @@ from app.services.customer_service import customer_service
 
 router = APIRouter()
 
-@router.post("/customers", response_model=CustomerResponse, status_code=201)
+@router.post("/customers", response_model=CustomerResponse, status_code=status.HTTP_201_CREATED)
 async def create_customer(customer_data: CustomerCreate, db: AsyncSession = Depends(get_db)):
     return await customer_service.create_customer(db, customer_data)
 
@@ -24,6 +24,6 @@ async def get_all_customers(db: AsyncSession = Depends(get_db)):
 async def update_customer(customer_id: UUID, customer_data: CustomerUpdate, db: AsyncSession = Depends(get_db)):
     return await customer_service.update_customer(db, customer_id, customer_data)
 
-@router.delete("/customers/{customer_id}", status_code=204)
+@router.delete("/customers/{customer_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_customer(customer_id: UUID, db: AsyncSession = Depends(get_db)):
     await customer_service.delete_customer(db, customer_id)

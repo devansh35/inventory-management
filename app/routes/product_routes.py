@@ -1,5 +1,5 @@
 from uuid import UUID
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Response, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
@@ -8,7 +8,7 @@ from app.services.product_service import product_service
 
 router = APIRouter()
 
-@router.post("/products", response_model=ProductResponse, status_code=201)
+@router.post("/products", response_model=ProductResponse, status_code=status.HTTP_201_CREATED)
 async def create_product(product_data: ProductCreate, db: AsyncSession = Depends(get_db)):
     return await product_service.create_product(db, product_data)
 
@@ -24,6 +24,7 @@ async def get_all_products(db: AsyncSession = Depends(get_db)):
 async def update_product(product_id: UUID, product_data: ProductUpdate, db: AsyncSession = Depends(get_db)):
     return await product_service.update_product(db, product_id, product_data)
 
-@router.delete("/products/{product_id}", status_code=204)
+@router.delete("/products/{product_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_product(product_id: UUID, db: AsyncSession = Depends(get_db)):
     await product_service.delete_product(db, product_id)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
